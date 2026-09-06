@@ -1,0 +1,53 @@
+use std.runtime;
+use raylib.ra;
+use raylib.ra.Vector2;
+
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # -- Init -----------
+    val sw: i32 = 600;
+    val sh: i32 = 350;
+    ra.init_window(sw, sh, "[core] render texture");
+    ra.set_target_fps(60);
+
+    val render_tex_w: i32 = 300;
+    val render_tex_h: i32 = 200;
+    var target: ra.RenderTexture2D = ra.load_render_texture( render_tex_w, render_tex_h);
+    var ball_pos: Vector2 = ra.vector2(render_tex_w::f32/2.0,render_tex_h::f32/2.0);
+    var ball_speed: Vector2 = ra.vector2(5.0, 4.0);
+    var ball_radius: i32 = 20;
+    var rotation: f32 = 0.0;
+
+    # --- Main loop -----
+    for (!ra.window_should_close()) {
+        # -- Update -----
+        ball_pos.x = ball_pos.x + ball_speed.x;
+        ball_pos.y = ball_pos.y + ball_speed.y;
+        if ((ball_pos.x::i32 >= (render_tex_w - ball_radius)) ||
+            (ball_pos.x::i32 <= ball_radius)) { ball_speed.x = ball_speed.x * -1.0;}
+        if ((ball_pos.y::i32 >= (render_tex_h - ball_radius)) ||
+            (ball_pos.y::i32 <= ball_radius)) { ball_speed.y = ball_speed.y * -1.0;}
+        rotation = rotation + 0.5;
+
+        # -- Draw -------
+        ra.begin_texture_mode(target);
+            ra.clear_background(ra.SKYBLUE);
+            ra.draw_rectangle(0, 0, 20, 20, ra.RED);
+            ra.draw_circle_v(ball_pos, ball_radius::f32, ra.MAROON);
+        ra.end_texture_mode();
+
+        ra.begin_drawing();
+            ra.clear_background(ra.LIGHTGRAY);
+            ra.draw_texture_pro(target.texture,
+                ra.rectangle(0.0, 0.0, target.texture.width::f32, -target.texture.height::f32),
+                ra.rectangle(sw::f32/2.0, sh::f32/2.0, target.texture.width::f32, target.texture.height::f32),
+                ra.vector2(target.texture.width::f32/2.0, target.texture.height::f32/2.0), rotation, ra.WHITE);
+            ra.draw_text("DRAWING BOUNCING BALL INSIDE RENDER TEXTURE!", 10, 0, 20, ra.BLACK);
+            ra.draw_fps(10, 20);
+            ra.logo(sw-160, sh-80, 1.0);
+        ra.end_drawing();
+    } # -----------------
+    # --- DeInit --------
+    ra.close_window();
+    ret 0;
+}

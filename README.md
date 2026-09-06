@@ -1,4 +1,6 @@
 ## mach-raylib
+<img width="200" height="178" alt="mach" src="mach.png" />
+
 [mach-raylib](https://github.com/Angluca/mach-raylib)  
 Mach language bindings for [Raylib](https://github.com/raysan5/raylib)
 * download deps

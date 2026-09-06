@@ -126,6 +126,14 @@ targets = ["*"]
 link = []
 need = []
 
+[artifact.core_render_texture]
+kind = "bin"
+entry = "core/core_render_texture.mach"
+out = "bin/core/core_render_texture"
+targets = ["*"]
+link = []
+need = []
+
 # -- textures ------------------
 # -- text ------------------
 # -- shapes ------------------
