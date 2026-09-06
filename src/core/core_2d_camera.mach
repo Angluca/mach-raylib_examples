@@ -10,7 +10,7 @@ fun main(argc: i64, argv: **u8) i64 {
     # -- Init -----------
     val sw: i32 = 800;
     val sh: i32 = 450;
-    ra.init_window(sw, sh, "2d camera");
+    ra.init_window(sw, sh, "[core] 2d camera");
     ra.set_target_fps(60);
 
     var player: ra.Rectangle = ra.Rectangle {x: 400.0, y: 280.0, width: 40.0, height: 40.0};

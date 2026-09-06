@@ -6,7 +6,7 @@ fun main(argc: i64, argv: **u8) i64 {
     # -- Init -----------
     val sw: i32 = 600;
     val sh: i32 = 200;
-    ra.init_window(sw, sh, "input keys");
+    ra.init_window(sw, sh, "[core]input keys");
     ra.set_target_fps(60);
 
     var ball_position: ra.Vector2 = ra.Vector2 { x: sw::f32/2.0, y: sh::f32/2.0 };

@@ -15,7 +15,7 @@ fun main(argc: i64, argv: **u8) i64 {
     # -- Init -----------
     val sw: i32 = 600;
     val sh: i32 = 350;
-    ra.init_window(sw, sh, "3d picking");
+    ra.init_window(sw, sh, "[core] 3d picking");
     ra.set_target_fps(60);
 
     var camera: ra.Camera; # Values default all zero

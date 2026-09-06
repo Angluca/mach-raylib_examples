@@ -20,7 +20,7 @@ fun main(argc: i64, argv: **u8) i64 {
     # -- Init -----------
     val sw: i32 = 800;
     val sh: i32 = 440;
-    ra.init_window(sw, sh, "2d camera split screen");
+    ra.init_window(sw, sh, "[core] 2d camera split screen");
     ra.set_target_fps(60);
 
     var player1: Rectangle = Rectangle{ x: 200.0, y: 200.0, width:  PLAYER_SIZE::f32, height: PLAYER_SIZE::f32 };

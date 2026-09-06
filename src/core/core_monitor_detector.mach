@@ -1,0 +1,114 @@
+use std.runtime;
+use std.types.string.str;
+use raylib.ra;
+use raylib.ra.Vector2;
+
+val MAX_MONITORS: i32 = 10;
+rec MonitorInfo {
+    pos: Vector2;
+    name: str;
+    w: i32;
+    h: i32;
+    physical_w: i32;
+    physical_h: i32;
+    refresh_rate: i32;
+}
+
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # -- Init -----------
+    val sw: i32 = 600;
+    val sh: i32 = 350;
+    ra.init_window(sw, sh, "[core] monitor detector");
+    ra.set_target_fps(60);
+
+    var monitors: [MAX_MONITORS]MonitorInfo;
+    var cur_monitor_idx: i32 = ra.get_current_monitor();
+    var monitor_count: i32 = 0;
+
+    # --- Main loop -----
+    for (!ra.window_should_close()) {
+        # -- Update -----
+        var max_w: i32 = 1;
+        var max_h: i32 = 1;
+        var offset_x: i32 = 0;
+        monitor_count = ra.get_monitor_count();
+        var i: i32 = 0;
+        for (i < monitor_count) {
+            fin { i = i + 1; }
+            monitors[i].pos = ra.get_monitor_position(i);
+            monitors[i].name = ra.get_monitor_name(i);
+            monitors[i].w = ra.get_monitor_width(i);
+            monitors[i].h = ra.get_monitor_height(i);
+            monitors[i].physical_w = ra.get_monitor_physical_width(i);
+            monitors[i].physical_h = ra.get_monitor_physical_height(i);
+            monitors[i].refresh_rate = ra.get_monitor_refresh_rate(i);
+
+            if (monitors[i].pos.x::i32 < offset_x) {
+                offset_x = -monitors[i].pos.x::i32;
+            }
+            val w: i32 = monitors[i].pos.x::i32 + monitors[i].w;
+            val h: i32 = monitors[i].pos.y::i32 + monitors[i].h;
+            if (max_w < w) { max_w = w; }
+            if (max_h < h) { max_h = h; }
+        }
+
+        if (ra.is_key_pressed(ra.KEY_ENTER) && (monitor_count > 1)) {
+            cur_monitor_idx = cur_monitor_idx + 1;
+            if (cur_monitor_idx == monitor_count) { cur_monitor_idx = 0; }
+            ra.set_window_monitor(cur_monitor_idx);
+        }
+        or { cur_monitor_idx = ra.get_current_monitor(); }
+
+        var monitor_scale: f32 = 0.6;
+        if (max_h > (max_w+offset_x)) {
+            monitor_scale = monitor_scale * (sh::f32/max_h::f32);
+        }
+        or { monitor_scale = monitor_scale * (sw::f32/(max_w+offset_x)::f32); }
+
+        # -- Draw -------
+        ra.begin_drawing();
+            ra.clear_background(ra.LIGHTGRAY);
+            ra.draw_text("Press [Enter] to move window to next monitor available", 20, 20, 20, ra.DARKGRAY);
+            ra.draw_rectangle_lines(20, 60, sw-40, sh-100, ra.DARKGRAY);
+            i = 0;
+            for (i < monitor_count) {
+                fin { i = i + 1; }
+                var rect: ra.Rectangle;
+                rect.x = (monitors[i].pos.x+offset_x::f32)*monitor_scale::f32+140.0;
+                rect.y = monitors[i].pos.y*monitor_scale+80.0;
+                rect.width = monitors[i].w::f32*monitor_scale;
+                rect.height = monitors[i].h::f32*monitor_scale;
+
+                ra.draw_text(ra.text_format("[%i] %s", i, monitors[i].name),
+                    rect.x::i32+10, rect.y::i32+(100.0*monitor_scale)::i32, (120.0*monitor_scale)::i32, ra.BLUE);
+                ra.draw_text(
+                    ra.text_format("Resolution: [%ipx x %ipx]\nRefreshRate: [%ihz]\nPhysical Size: [%imm x %imm]\nPosition: %3.0f x %3.0f",
+                        monitors[i].w,
+                        monitors[i].h,
+                        monitors[i].refresh_rate,
+                        monitors[i].physical_w,
+                        monitors[i].physical_h,
+                        monitors[i].pos.x::i32,
+                        monitors[i].pos.y::i32
+                    ), rect.x::i32+10, rect.y::i32+(200.0*monitor_scale)::i32, (120.0*monitor_scale)::i32, ra.DARKGRAY);
+
+                if (i == cur_monitor_idx) {
+                    ra.draw_rectangle_lines_ex(rect, 5.0, ra.RED);
+                    var win_pos: Vector2 = ra.get_window_position();
+                    win_pos.x = (win_pos.x+offset_x::f32)*monitor_scale+140.0;
+                    win_pos.y = win_pos.y*monitor_scale+80.0;
+                    ra.draw_rectangle_v(win_pos,
+                        ra.vector2(sw::f32*monitor_scale, sh::f32*monitor_scale),
+                        ra.fade(ra.GREEN, 0.5));
+                }
+                or { ra.draw_rectangle_lines_ex(rect, 5.0, ra.GRAY); }
+            }
+            ra.logo(sw-160, sh-80, 1.0);
+        ra.end_drawing();
+    } # -----------------
+    # --- DeInit --------
+    ra.close_window();
+    ret 0;
+}
+

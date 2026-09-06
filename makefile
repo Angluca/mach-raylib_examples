@@ -27,7 +27,7 @@ $(TARGETS): %: %.mach
 RUN_TARGET := $(firstword $(filter-out run,$(MAKECMDGOALS)))
 ifeq ($(RUN_TARGET),)
 ifeq ($(filter run,$(MAKECMDGOALS)),run)
-$(error usage: make run <name>, 例如: make run demo)
+$(error usage: make run <name>, example: make run demo)
 endif
 endif
 

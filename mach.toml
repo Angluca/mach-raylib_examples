@@ -41,7 +41,7 @@ ref = "branch/main"
 [artifact.core_basic_window]
 kind = "bin"
 entry = "core/core_basic_window.mach"
-out = "bin/core_basic_window"
+out = "bin/core/core_basic_window"
 targets = ["*"]
 link = []
 need = []
@@ -49,7 +49,7 @@ need = []
 [artifact.core_basic_screen_manager]
 kind = "bin"
 entry = "core/core_basic_screen_manager.mach"
-out = "bin/core_basic_screen_manager"
+out = "bin/core/core_basic_screen_manager"
 targets = ["*"]
 link = []
 need = []
@@ -57,7 +57,7 @@ need = []
 [artifact.core_input_keys]
 kind = "bin"
 entry = "core/core_input_keys.mach"
-out = "bin/core_input_keys"
+out = "bin/core/core_input_keys"
 targets = ["*"]
 link = []
 need = []
@@ -65,7 +65,7 @@ need = []
 [artifact.core_input_mouse]
 kind = "bin"
 entry = "core/core_input_mouse.mach"
-out = "bin/core_input_mouse"
+out = "bin/core/core_input_mouse"
 targets = ["*"]
 link = []
 need = []
@@ -73,7 +73,7 @@ need = []
 [artifact.core_scissor_test]
 kind = "bin"
 entry = "core/core_scissor_test.mach"
-out = "bin/core_scissor_test"
+out = "bin/core/core_scissor_test"
 targets = ["*"]
 link = []
 need = []
@@ -81,7 +81,7 @@ need = []
 [artifact.core_2d_camera_mouse_zoom]
 kind = "bin"
 entry = "core/core_2d_camera_mouse_zoom.mach"
-out = "bin/core_2d_camera_mouse_zoom"
+out = "bin/core/core_2d_camera_mouse_zoom"
 targets = ["*"]
 link = []
 need = []
@@ -89,7 +89,7 @@ need = []
 [artifact.core_2d_camera_split_screen]
 kind = "bin"
 entry = "core/core_2d_camera_split_screen.mach"
-out = "bin/core_2d_camera_split_screen"
+out = "bin/core/core_2d_camera_split_screen"
 targets = ["*"]
 link = []
 need = []
@@ -97,7 +97,7 @@ need = []
 [artifact.core_2d_camera]
 kind = "bin"
 entry = "core/core_2d_camera.mach"
-out = "bin/core_2d_camera"
+out = "bin/core/core_2d_camera"
 targets = ["*"]
 link = []
 need = []
@@ -105,7 +105,7 @@ need = []
 [artifact.core_3d_camera_first_person]
 kind = "bin"
 entry = "core/core_3d_camera_first_person.mach"
-out = "bin/core_3d_camera_first_person"
+out = "bin/core/core_3d_camera_first_person"
 targets = ["*"]
 link = []
 need = []
@@ -113,7 +113,15 @@ need = []
 [artifact.core_3d_picking]
 kind = "bin"
 entry = "core/core_3d_picking.mach"
-out = "bin/core_3d_picking"
+out = "bin/core/core_3d_picking"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_monitor_detector]
+kind = "bin"
+entry = "core/core_monitor_detector.mach"
+out = "bin/core/core_monitor_detector"
 targets = ["*"]
 link = []
 need = []
