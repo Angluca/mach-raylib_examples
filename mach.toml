@@ -20,25 +20,32 @@ os  = "darwin"
 abi = "sysv64"
 
 [profile.debug]
+default = true
 opt = 0
 debug = true
 simd = "scalarize"
+vectorize = true
+float_reassoc = false
 
 [profile.release]
 opt = 2
 debug = false
 simd = "scalarize"
+vectorize = true
+float_reassoc = false
 
-[dep.mach-raylib]
+[dep.raylib]
+#path = "dep/raylib"
 git = "https://github.com/angluca/mach-raylib"
 ref = "branch/main"
 
-[dep.mach-std]
+[dep.std]
 git = "https://github.com/briar-systems/mach-std"
 ref = "branch/main"
 
 # -- examples --------------------------------
 [artifact.core_basic_window]
+default = true
 kind = "bin"
 entry = "core/core_basic_window.mach"
 out = "bin/core/core_basic_window"

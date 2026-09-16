@@ -1,0 +1,6 @@
+[submodule "dep/raylib"]
+	path = dep/raylib
+	url = https://github.com/angluca/mach-raylib
+[submodule "dep/std"]
+	path = dep/std
+	url = https://github.com/briar-systems/mach-std

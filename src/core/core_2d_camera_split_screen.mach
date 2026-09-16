@@ -1,12 +1,6 @@
 use std.runtime;
-use std.types.result.Result;
-use std.types.result.is_err;
-use std.types.result.unwrap_ok;
-use std.types.result.unwrap_err;
+use std.types.result.res;
 use std.types.string.str;
-use A: std.allocator;
-use std.allocator.fixed;
-use std.format.sprint;
 
 use raylib.ra;
 use rl: raylib.rlgl;
@@ -53,13 +47,6 @@ fun main(argc: i64, argv: **u8) i64 {
     #camera.zoom = 1.0;
     #var zoom_mode: i32 = 0;
 
-    var buf: [256]u8;
-    var st: fixed.FixedState;
-    var al: A.Allocator;
-    fixed.make(?al, ?st, ?buf[0], $size_of(buf));
-    var rbuf: Result[str, str];
-    var ps: str;
-
     # --- Main loop -----
     for (!ra.window_should_close()) {
         # -- Update -----
@@ -93,17 +80,19 @@ fun main(argc: i64, argv: **u8) i64 {
                     j = 0;
                     for (j < sh/PLAYER_SIZE) {
                         fin { j = j + 1; }
-                        fixed.reset(?st);
-                        rbuf = sprint(?al, "[{}, {}]", i, j);
-                        ps = unwrap_ok[str, str](rbuf);
-                        ra.draw_text(ps, 10+PLAYER_SIZE*i, 15+PLAYER_SIZE*j, 10, ra.LIGHTGRAY);
+
+                        val ii: i32 = 10+PLAYER_SIZE*i;
+                        val jj: i32 = 15+PLAYER_SIZE*j;
+                        ra.draw_text(
+                            ra.text_format("[%i, %i]", ii, jj),
+                            ii, jj, 10, ra.LIGHTGRAY);
                     }
                 }
                 ra.draw_rectangle_rec(player1, ra.RED);
                 ra.draw_rectangle_rec(player2, ra.BLUE);
             ra.end_mode2d();
 
-            ra.draw_rectangle(0, 0, ra.get_screen_width()/2, 30, ra.fade(ra.LIGHTGRAY, 0.6f));
+            ra.draw_rectangle(0, 0, ra.get_screen_width()/2, 30, ra.fade(ra.LIGHTGRAY, 0.6));
             ra.draw_text("PLAYER1: W/S/A/D to move", 10, 10, 10, ra.MAROON);
         ra.end_texture_mode();
 
@@ -125,17 +114,19 @@ fun main(argc: i64, argv: **u8) i64 {
                     j = 0;
                     for (j < sh/PLAYER_SIZE) {
                         fin { j = j + 1; }
-                        fixed.reset(?st);
-                        rbuf = sprint(?al, "[{}, {}]", i, j);
-                        ps = unwrap_ok[str, str](rbuf);
-                        ra.draw_text(ps, 10+PLAYER_SIZE*i, 15+PLAYER_SIZE*j, 10, ra.LIGHTGRAY);
+
+                        val ii: i32 = 10+PLAYER_SIZE*i;
+                        val jj: i32 = 15+PLAYER_SIZE*j;
+                        ra.draw_text(
+                            ra.text_format("[%i, %i]", ii, jj),
+                            ii, jj, 10, ra.LIGHTGRAY);
                     }
                 }
                 ra.draw_rectangle_rec(player1, ra.RED);
                 ra.draw_rectangle_rec(player2, ra.BLUE);
             ra.end_mode2d();
 
-            ra.draw_rectangle(0, 0, ra.get_screen_width()/2, 30, ra.fade(ra.LIGHTGRAY, 0.6f));
+            ra.draw_rectangle(0, 0, ra.get_screen_width()/2, 30, ra.fade(ra.LIGHTGRAY, 0.6));
             ra.draw_text("PLAYER2: Mouse to move", 10, 10, 10, ra.DARKBLUE);
         ra.end_texture_mode();
 
