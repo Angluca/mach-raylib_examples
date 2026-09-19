@@ -3,6 +3,7 @@ id = "examples"
 version = "0.1.0"
 src = "src"
 out = "out"
+mach = "^5"
 
 [target.linux-x86_64]
 isa = "x86_64"
