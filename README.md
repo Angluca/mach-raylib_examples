@@ -5,7 +5,7 @@
 Mach language bindings for [Raylib](https://github.com/raysan5/raylib)
 * download deps
 ```zsh
-mach dep pull
+mach dep pull .
 ```
 ## Use Makefile
 ```zsh

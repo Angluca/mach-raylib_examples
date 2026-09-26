@@ -22,6 +22,11 @@ fun main(argc: i64, argv: **u8) i64 {
         if (ra.is_key_pressed(ra.KEY_ONE)) { zoom_mode = 0; }
         or (ra.is_key_pressed(ra.KEY_TWO)) { zoom_mode = 1; }
 
+        if (ra.is_mouse_button_pressed(ra.MOUSE_BUTTON_RIGHT)) {
+            if (zoom_mode == 0) { zoom_mode = 1; }
+            or { zoom_mode = 0; }
+        }
+
         if (ra.is_mouse_button_down(ra.MOUSE_BUTTON_LEFT)) {
             var delta: Vector2 = ra.get_mouse_delta();
             delta = ra.vector2_scale(delta, -1.0/camera.zoom);
