@@ -22,7 +22,7 @@ all: $(TARGETS)
 .PHONY: $(TARGETS)
 
 $(TARGETS): %: %.mach
-	mach build . $(MFLAGS) -v --bin $@
+	mach build . $(MFLAGS) -v -a $@
 
 RUN_TARGET := $(firstword $(filter-out run,$(MAKECMDGOALS)))
 ifeq ($(RUN_TARGET),)
@@ -32,7 +32,7 @@ endif
 endif
 
 run: $(RUN_TARGET)
-	mach run . --bin $(RUN_TARGET)
+	mach run . -a $(RUN_TARGET)
 
 clean:
 	@rm -rf ./out

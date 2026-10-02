@@ -25,8 +25,8 @@ make run file_name ARGS="-L raylibs/path"
 # build
 mach build . -L lib/path
 # or 
-mach build . -L lib/path --bin file_name
+mach build . -L lib/path -a file_name
 
 # run
-mach run . --bin file_name
+mach run . -a file_name
 ```
