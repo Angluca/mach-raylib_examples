@@ -1,8 +1,8 @@
 use std.runtime;
-use std.types.bool.bool;
-use std.types.bool.true;
-use std.types.bool.false;
-use std.types.string.str;
+#use std.types.bool.bool;
+#use std.types.bool.true;
+#use std.types.bool.false;
+#use std.types.string.str;
 
 use raylib.ra;  # ra is composed of raylib/raymath/rcamera
 #use rl: raylib.rlgl;

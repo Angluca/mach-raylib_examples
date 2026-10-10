@@ -39,7 +39,7 @@ fun main(argc: i64, argv: **u8) i64 {
 
     # --- Main loop -----
     for (!ra.window_should_close()) {
-        ## -- Update -----
+        # -- Update -----
         if (ra.is_key_down(ra.KEY_RIGHT)) { player.x = player.x + 2.0; }
         or (ra.is_key_down(ra.KEY_LEFT)) { player.x = player.x - 2.0; }
 

@@ -1,6 +1,6 @@
 use std.runtime;
-use std.types.result.res;
-use std.types.string.str;
+#use std.types.result.res;
+#use std.types.string.str;
 
 use raylib.ra;
 use rl: raylib.rlgl;
