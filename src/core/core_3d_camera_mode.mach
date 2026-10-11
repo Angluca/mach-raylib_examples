@@ -1,0 +1,49 @@
+use std.runtime;
+use raylib.ra;
+
+# entrypoint of the 3d camera mode example
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # initialization
+    val screen_width: i32 = 800;
+    val screen_height: i32 = 450;
+    ra.init_window(screen_width, screen_height, "raylib [core] example - 3d camera mode");
+
+    # define the camera to look into our 3d world
+    var camera: ra.Camera;
+    camera.position = ra.Vector3{ x: 0.0, y: 10.0, z: 10.0 }; # camera position
+    camera.target = ra.Vector3{ x: 0.0, y: 0.0, z: 0.0 };     # camera looking at point
+    camera.up = ra.Vector3{ x: 0.0, y: 1.0, z: 0.0 };         # camera up vector (rotation towards target)
+    camera.fovy = 45.0;                                       # camera field-of-view y
+    camera.projection = ra.CAMERA_PERSPECTIVE;                # camera mode type
+
+    val cube_position: ra.Vector3 = ra.Vector3{ x: 0.0, y: 0.0, z: 0.0 };
+
+    ra.set_target_fps(60); # set our game to run at 60 frames-per-second
+
+    # main game loop
+    for (!ra.window_should_close()) { # detect window close button or esc key
+        # update
+
+        # todo: update your variables here
+
+        # draw
+        ra.begin_drawing();
+            ra.clear_background(ra.RAYWHITE);
+            ra.begin_mode3d(camera);
+                ra.draw_cube(cube_position, 2.0, 2.0, 2.0, ra.RED);
+                ra.draw_cube_wires(cube_position, 2.0, 2.0, 2.0, ra.MAROON);
+                ra.draw_grid(10, 1.0);
+            ra.end_mode3d();
+            ra.draw_text("Welcome to the third dimension!", 10, 40, 20, ra.DARKGRAY);
+            ra.draw_fps(10, 10);
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    # de-initialization
+    ra.close_window(); # close window and opengl context
+
+    ret 0;
+}
+

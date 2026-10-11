@@ -139,6 +139,46 @@ targets = ["*"]
 link = []
 need = []
 
+[artifact.core_2d_camera_platformer]
+kind = "bin"
+entry = "core/core_2d_camera_platformer.mach"
+out = "bin/core/core_2d_camera_platformer"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_3d_camera_fps]
+kind = "bin"
+entry = "core/core_3d_camera_fps.mach"
+out = "bin/core/core_3d_camera_fps"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_3d_camera_free]
+kind = "bin"
+entry = "core/core_3d_camera_free.mach"
+out = "bin/core/core_3d_camera_free"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_3d_camera_split_screen]
+kind = "bin"
+entry = "core/core_3d_camera_split_screen.mach"
+out = "bin/core/core_3d_camera_split_screen"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_3d_camera_mode]
+kind = "bin"
+entry = "core/core_3d_camera_mode.mach"
+out = "bin/core/core_3d_camera_mode"
+targets = ["*"]
+link = []
+need = []
+
 # -- textures ------------------
 # -- text ----------------------
 # -- shapes --------------------

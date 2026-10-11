@@ -1,0 +1,62 @@
+use std.runtime;
+use raylib.ra;
+
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    var screen_width: i32 = 800;
+    var screen_height: i32 = 450;
+
+    ra.init_window(
+        screen_width,
+        screen_height,
+        "raylib [core] example - 3d camera free",
+    );
+
+    var camera: ra.Camera3D = ra.Camera3D{
+        position: ra.Vector3{x: 10.0, y: 10.0, z: 10.0},
+        #target: ra.Vector3{x: 0.0, y: 0.0, z: 0.0}, # default all 0.0
+        up: ra.Vector3{x: 0.0, y: 1.0, z: 0.0},
+        fovy: 45.0,
+        projection: ra.CAMERA_PERSPECTIVE,
+    };
+
+    var cube_position: ra.Vector3; # default all 0.0
+
+    ra.disable_cursor();
+    ra.set_target_fps(60);
+
+    for (!ra.window_should_close()) {
+        ra.update_camera(?camera, ra.CAMERA_FREE);
+
+        if (ra.is_key_pressed(ra.KEY_Z)) {
+            camera.target = ra.Vector3{x: 0.0, y: 0.0, z: 0.0};
+        }
+
+        ra.begin_drawing();
+
+            ra.clear_background(ra.RAYWHITE);
+
+            ra.begin_mode3d(camera);
+
+                ra.draw_cube(cube_position, 2.0, 2.0, 2.0, ra.RED);
+                ra.draw_cube_wires(cube_position, 2.0, 2.0, 2.0, ra.MAROON);
+
+                ra.draw_grid(10, 1.0);
+
+            ra.end_mode3d();
+
+            ra.draw_rectangle(10, 10, 320, 93, ra.fade(ra.SKYBLUE, 0.5));
+            ra.draw_rectangle_lines(10, 10, 320, 93, ra.BLUE);
+
+            ra.draw_text("Free camera default controls:", 20, 20, 10, ra.BLACK);
+            ra.draw_text("- Mouse Wheel to Zoom in-out", 40, 40, 10, ra.DARKGRAY);
+            ra.draw_text("- Mouse Wheel Pressed to Pan", 40, 60, 10, ra.DARKGRAY);
+            ra.draw_text("- Z to zoom to (0, 0, 0)", 40, 80, 10, ra.DARKGRAY);
+
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    ra.close_window();
+}
+

@@ -1,0 +1,221 @@
+use std.runtime;
+use std.types.bool.bool;
+use std.types.bool.false;
+use std.types.bool.true;
+use raylib.ra;
+
+# player state used by the platformer example
+rec Player {
+    position: ra.Vector2;
+    speed: f32;
+    can_jump: bool;
+}
+
+# one platform or collision surface
+rec EnvItem {
+    rect: ra.Rectangle;
+    blocking: i32;
+    color: ra.Color;
+}
+
+var player: Player;
+var env_items: [5]EnvItem;
+var camera: ra.Camera2D;
+var camera_option: i32 = 0;
+var evening_out: bool = false;
+var even_out_target: f32 = 0.0;
+
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    val screen_width: i32 = 800;
+    val screen_height: i32 = 450;
+
+    ra.init_window(screen_width, screen_height, "raylib [core] example - 2d camera platformer");
+
+    player.position = ra.Vector2{ x: 400.0, y: 280.0 };
+    player.speed = 0.0;
+    player.can_jump = false;
+
+    env_items[0] = EnvItem{ rect: ra.Rectangle{ x: 0.0, y: 0.0, width: 1000.0, height: 400.0 }, blocking: 0, color: ra.LIGHTGRAY };
+    env_items[1] = EnvItem{ rect: ra.Rectangle{ x: 0.0, y: 400.0, width: 1000.0, height: 200.0 }, blocking: 1, color: ra.GRAY };
+    env_items[2] = EnvItem{ rect: ra.Rectangle{ x: 300.0, y: 200.0, width: 400.0, height: 10.0 }, blocking: 1, color: ra.GRAY };
+    env_items[3] = EnvItem{ rect: ra.Rectangle{ x: 250.0, y: 300.0, width: 100.0, height: 10.0 }, blocking: 1, color: ra.GRAY };
+    env_items[4] = EnvItem{ rect: ra.Rectangle{ x: 650.0, y: 300.0, width: 100.0, height: 10.0 }, blocking: 1, color: ra.GRAY };
+
+    camera.target = player.position;
+    camera.offset = ra.Vector2{ x: ra.get_render_width()::f32 / 2.0, y: ra.get_render_height()::f32 / 2.0 };
+    camera.rotation = 0.0;
+    camera.zoom = 1.0;
+
+    ra.set_target_fps(60);
+
+    for (!ra.window_should_close()) {
+        val delta_time: f32 = ra.get_frame_time();
+
+        # Update player movement and jumping.
+        if (ra.is_key_down(ra.KEY_LEFT) || ra.is_key_down(ra.KEY_A)) {
+            player.position.x = player.position.x - 200.0 * delta_time;
+        }
+        if (ra.is_key_down(ra.KEY_RIGHT) || ra.is_key_down(ra.KEY_D)) {
+            player.position.x = player.position.x + 200.0 * delta_time;
+        }
+        if (ra.is_key_down(ra.KEY_SPACE) && player.can_jump) {
+            player.speed = -350.0;
+            player.can_jump = false;
+        }
+
+        var hit_obstacle: bool = false;
+        var i: i32 = 0;
+        for (i < 5 && !hit_obstacle) {
+            fin { i = i + 1; }
+            val item: EnvItem = env_items[i];
+            if (item.blocking != 0 && item.rect.x <= player.position.x && item.rect.x + item.rect.width >= player.position.x && item.rect.y >= player.position.y && item.rect.y <= player.position.y + player.speed * delta_time) {
+                hit_obstacle = true;
+                player.speed = 0.0;
+                player.position.y = item.rect.y;
+            }
+        }
+
+        if (!hit_obstacle) {
+            player.position.y = player.position.y + player.speed * delta_time;
+            player.speed = player.speed + 400.0 * delta_time;
+            player.can_jump = false;
+        }
+        or {
+            player.can_jump = true;
+        }
+
+        # Mouse wheel zoom, clamped to a useful range.
+        camera.zoom = camera.zoom + ra.get_mouse_wheel_move() * 0.05;
+        if (camera.zoom > 3.0) {
+            camera.zoom = 3.0;
+        }
+        or (camera.zoom < 0.25) {
+            camera.zoom = 0.25;
+        }
+
+        if (ra.is_key_pressed(ra.KEY_R)) {
+            camera.zoom = 1.0;
+            player.position = ra.Vector2{ x: 400.0, y: 280.0 };
+            player.speed = 0.0;
+            player.can_jump = false;
+        }
+        if (ra.is_key_pressed(ra.KEY_C)) {
+            camera_option = (camera_option + 1) % 5;
+        }
+
+        # Camera mode 0: follow player center.
+        if (camera_option == 0) {
+            camera.offset = ra.Vector2{ x: screen_width::f32 / 2.0, y: screen_height::f32 / 2.0 };
+            camera.target = player.position;
+        }
+        # Camera mode 1: follow the player but keep the map edges on screen.
+        or (camera_option == 1) {
+            camera.target = player.position;
+            camera.offset = ra.Vector2{ x: screen_width::f32 / 2.0, y: screen_height::f32 / 2.0 };
+
+            var min_x: f32 = 1000.0;
+            var min_y: f32 = 1000.0;
+            var max_x: f32 = -1000.0;
+            var max_y: f32 = -1000.0;
+            var j: i32 = 0;
+            for (j < 5) {
+                fin { j = j + 1; }
+                val item: EnvItem = env_items[j];
+                if (item.rect.x < min_x) { min_x = item.rect.x; }
+                if (item.rect.x + item.rect.width > max_x) { max_x = item.rect.x + item.rect.width; }
+                if (item.rect.y < min_y) { min_y = item.rect.y; }
+                if (item.rect.y + item.rect.height > max_y) { max_y = item.rect.y + item.rect.height; }
+            }
+
+            val map_max: ra.Vector2 = ra.get_world_to_screen2d(ra.Vector2{ x: max_x, y: max_y }, camera);
+            val map_min: ra.Vector2 = ra.get_world_to_screen2d(ra.Vector2{ x: min_x, y: min_y }, camera);
+            if (map_max.x < screen_width::f32) { camera.offset.x = screen_width::f32 - (map_max.x - screen_width::f32 / 2.0); }
+            if (map_max.y < screen_height::f32) { camera.offset.y = screen_height::f32 - (map_max.y - screen_height::f32 / 2.0); }
+            if (map_min.x > 0.0) { camera.offset.x = screen_width::f32 / 2.0 - map_min.x; }
+            if (map_min.y > 0.0) { camera.offset.y = screen_height::f32 / 2.0 - map_min.y; }
+        }
+        # Camera mode 2: smooth follow.
+        or (camera_option == 2) {
+            camera.offset = ra.Vector2{ x: screen_width::f32 / 2.0, y: screen_height::f32 / 2.0 };
+            val diff: ra.Vector2 = ra.Vector2{ x: player.position.x - camera.target.x, y: player.position.y - camera.target.y };
+            val length: f32 = ra.vector2_length(diff);
+            if (length > 10.0) {
+                var speed: f32 = 0.8 * length;
+                if (speed < 30.0) { speed = 30.0; }
+                camera.target.x = camera.target.x + diff.x * speed * delta_time / length;
+                camera.target.y = camera.target.y + diff.y * speed * delta_time / length;
+            }
+        }
+        # Camera mode 3: follow horizontally and ease vertically after landing.
+        or (camera_option == 3) {
+            camera.offset = ra.Vector2{ x: screen_width::f32 / 2.0, y: screen_height::f32 / 2.0 };
+            camera.target.x = player.position.x;
+            if (evening_out) {
+                if (even_out_target > camera.target.y) {
+                    camera.target.y = camera.target.y + 700.0 * delta_time;
+                    if (camera.target.y > even_out_target) {
+                        camera.target.y = even_out_target;
+                        evening_out = false;
+                    }
+                }
+                or {
+                    camera.target.y = camera.target.y - 700.0 * delta_time;
+                    if (camera.target.y < even_out_target) {
+                        camera.target.y = even_out_target;
+                        evening_out = false;
+                    }
+                }
+            }
+            or {
+                if (player.can_jump && player.speed == 0.0 && player.position.y != camera.target.y) {
+                    evening_out = true;
+                    even_out_target = player.position.y;
+                }
+            }
+        }
+        # Camera mode 4: move the camera only when the player leaves a central box.
+        or {
+            val bbox_x: f32 = 0.2;
+            val bbox_y: f32 = 0.2;
+            val box_min: ra.Vector2 = ra.get_screen_to_world2d(ra.Vector2{ x: (1.0 - bbox_x) * 0.5 * screen_width::f32, y: (1.0 - bbox_y) * 0.5 * screen_height::f32 }, camera);
+            val box_max: ra.Vector2 = ra.get_screen_to_world2d(ra.Vector2{ x: (1.0 + bbox_x) * 0.5 * screen_width::f32, y: (1.0 + bbox_y) * 0.5 * screen_height::f32 }, camera);
+            camera.offset = ra.Vector2{ x: (1.0 - bbox_x) * 0.5 * screen_width::f32, y: (1.0 - bbox_y) * 0.5 * screen_height::f32 };
+            if (player.position.x < box_min.x) { camera.target.x = player.position.x; }
+            if (player.position.y < box_min.y) { camera.target.y = player.position.y; }
+            if (player.position.x > box_max.x) { camera.target.x = box_min.x + (player.position.x - box_max.x); }
+            if (player.position.y > box_max.y) { camera.target.y = box_min.y + (player.position.y - box_max.y); }
+        }
+
+        ra.begin_drawing();
+            ra.clear_background(ra.LIGHTGRAY);
+            ra.begin_mode2d(camera);
+            var k: i32 = 0;
+            for (k < 5) {
+                fin { k = k + 1; }
+                ra.draw_rectangle_rec(env_items[k].rect, env_items[k].color);
+            }
+            val player_rect: ra.Rectangle = ra.Rectangle{ x: player.position.x - 20.0, y: player.position.y - 40.0, width: 40.0, height: 40.0 };
+            ra.draw_rectangle_rec(player_rect, ra.RED);
+            ra.draw_circle_v(player.position, 5.0, ra.GOLD);
+            ra.end_mode2d();
+
+            ra.draw_text("Controls:", 20, 20, 10, ra.BLACK);
+            ra.draw_text("- Right/Left A/D to move", 40, 40, 10, ra.DARKGRAY);
+            ra.draw_text("- Space to jump", 40, 60, 10, ra.DARKGRAY);
+            ra.draw_text("- Mouse Wheel to Zoom in-out", 40, 80, 10, ra.DARKGRAY);
+            ra.draw_text("- R to reset position + zoom", 40, 100, 10, ra.DARKGRAY);
+            ra.draw_text("- C to change camera mode", 40, 120, 10, ra.DARKGRAY);
+            ra.draw_text("Current camera mode:", 20, 140, 10, ra.BLACK);
+            if (camera_option == 0) { ra.draw_text("Follow player center", 40, 160, 10, ra.DARKGRAY); }
+            or (camera_option == 1) { ra.draw_text("Follow center, clamp to map", 40, 160, 10, ra.DARKGRAY); }
+            or (camera_option == 2) { ra.draw_text("Follow player center; smoothed", 40, 160, 10, ra.DARKGRAY); }
+            or (camera_option == 3) { ra.draw_text("Horizontal follow; vertical on landing", 40, 160, 10, ra.DARKGRAY); }
+            or { ra.draw_text("Push camera near screen edge", 40, 160, 10, ra.DARKGRAY); }
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    ra.close_window();
+    ret 0;
+}
