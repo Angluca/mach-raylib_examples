@@ -1,5 +1,5 @@
 use std.runtime;
-use std.types.bool.bool;
+#use std.types.bool.bool;
 use std.types.bool.true;
 use std.types.bool.false;
 use std.types.string.str;

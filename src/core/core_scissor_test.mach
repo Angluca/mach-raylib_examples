@@ -1,7 +1,7 @@
 use std.runtime;
 use std.types.bool.bool;
 use std.types.bool.true;
-use std.types.bool.false;
+#use std.types.bool.false;
 use raylib.ra;
 
 #[symbol("main")]
@@ -18,11 +18,10 @@ fun main(argc: i64, argv: **u8) i64 {
     # --- Main loop -----
     for (!ra.window_should_close()) {
         # -- Update -----
-        # scissor_arean follow mouse
         scissor_area.x = ra.get_mouse_x()::f32 - scissor_area.width/2.0;
         scissor_area.y = ra.get_mouse_y()::f32 - scissor_area.height/2.0;
 
-        ## -- Draw -------
+        # -- Draw -------
         ra.begin_drawing();
             ra.clear_background(ra.GRAY);
 

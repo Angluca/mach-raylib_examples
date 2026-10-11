@@ -18,7 +18,7 @@ fun main(argc: i64, argv: **u8) i64 {
 
     # --- Main loop -----
     for (!ra.window_should_close()) {
-        ## -- Update -----
+        # -- Update -----
         if (ra.is_key_pressed(ra.KEY_ONE)) { zoom_mode = 0; }
         or (ra.is_key_pressed(ra.KEY_TWO)) { zoom_mode = 1; }
 
