@@ -1,0 +1,267 @@
+use std.runtime;
+use std.types.string.str;
+use raylib.ra;
+
+# gamepad name id depends on drivers and os
+val xbox_alias_1: str = "xbox";
+val xbox_alias_2: str = "x-box";
+val ps_alias_1: str = "playstation";
+val ps_alias_2: str = "sony";
+
+# entrypoint of the input gamepad example
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # initialization
+    val screen_width: i32 = 800;
+    val screen_height: i32 = 450;
+
+    ra.set_config_flags(ra.FLAG_MSAA_4X_HINT); # set msaa 4x hint before windows creation
+
+    ra.init_window(screen_width, screen_height, "raylib [core] example - input gamepad");
+
+    val tex_ps3_pad: ra.Texture = ra.load_texture("assets/core/ps3.png");
+    val tex_xbox_pad: ra.Texture = ra.load_texture("assets/core/xbox.png");
+
+    # set axis deadzones
+    val left_stick_deadzone_x: f32 = 0.1;
+    val left_stick_deadzone_y: f32 = 0.1;
+    val right_stick_deadzone_x: f32 = 0.1;
+    val right_stick_deadzone_y: f32 = 0.1;
+
+    val left_trigger_deadzone: f32 = -0.9;
+    val right_trigger_deadzone: f32 = -0.9;
+
+    var vibrate_button: ra.Rectangle; # zero-initialized, like { 0 }
+
+    ra.set_target_fps(60); # set our game to run at 60 frames-per-second
+
+    var gamepad: i32 = 0; # which gamepad to display
+
+    # main game loop
+    for (!ra.window_should_close()) { # detect window close button or esc key
+        # update
+
+        if (ra.is_key_pressed(ra.KEY_LEFT) && gamepad > 0) {
+            gamepad = gamepad - 1;
+        }
+        if (ra.is_key_pressed(ra.KEY_RIGHT)) {
+            gamepad = gamepad + 1;
+        }
+        val mouse_position: ra.Vector2 = ra.get_mouse_position();
+
+        vibrate_button = ra.Rectangle{
+            x: 10.0,
+            y: 70.0 + 20.0 * (ra.get_gamepad_axis_count(gamepad))::f32 + 20.0,
+            width: 75.0,
+            height: 24.0
+        };
+        if (ra.is_mouse_button_pressed(ra.MOUSE_BUTTON_LEFT) && ra.check_collision_point_rec(mouse_position, vibrate_button)) {
+            ra.set_gamepad_vibration(gamepad, 1.0, 1.0, 1.0);
+        }
+
+        # draw
+        ra.begin_drawing();
+            ra.clear_background(ra.RAYWHITE);
+
+            if (ra.is_gamepad_available(gamepad)) {
+                ra.draw_text(ra.text_format("GP%d: %s", gamepad, ra.get_gamepad_name(gamepad)), 10, 10, 10, ra.BLACK);
+
+                # get axis values
+                var left_stick_x: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_LEFT_X);
+                var left_stick_y: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_LEFT_Y);
+                var right_stick_x: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_RIGHT_X);
+                var right_stick_y: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_RIGHT_Y);
+                var left_trigger: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_LEFT_TRIGGER);
+                var right_trigger: f32 = ra.get_gamepad_axis_movement(gamepad, ra.GAMEPAD_AXIS_RIGHT_TRIGGER);
+
+                # calculate deadzones
+                if (left_stick_x > -left_stick_deadzone_x && left_stick_x < left_stick_deadzone_x) { left_stick_x = 0.0; }
+                if (left_stick_y > -left_stick_deadzone_y && left_stick_y < left_stick_deadzone_y) { left_stick_y = 0.0; }
+                if (right_stick_x > -right_stick_deadzone_x && right_stick_x < right_stick_deadzone_x) { right_stick_x = 0.0; }
+                if (right_stick_y > -right_stick_deadzone_y && right_stick_y < right_stick_deadzone_y) { right_stick_y = 0.0; }
+                if (left_trigger < left_trigger_deadzone) { left_trigger = -1.0; }
+                if (right_trigger < right_trigger_deadzone) { right_trigger = -1.0; }
+
+                if ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), xbox_alias_1) > -1) ||
+                    (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), xbox_alias_2) > -1)) {
+                    ra.draw_texture(tex_xbox_pad, 0, 0, ra.DARKGRAY);
+
+                    # draw buttons: xbox home
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE)) { ra.draw_circle(394, 89, 19.0, ra.RED); }
+
+                    # draw buttons: basic
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_RIGHT)) { ra.draw_circle(436, 150, 9.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_LEFT)) { ra.draw_circle(352, 150, 9.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) { ra.draw_circle(501, 151, 15.0, ra.BLUE); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) { ra.draw_circle(536, 187, 15.0, ra.LIME); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) { ra.draw_circle(572, 151, 15.0, ra.MAROON); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_UP)) { ra.draw_circle(536, 115, 15.0, ra.GOLD); }
+
+                    # draw buttons: d-pad
+                    ra.draw_rectangle(317, 202, 19, 71, ra.BLACK);
+                    ra.draw_rectangle(293, 228, 69, 19, ra.BLACK);
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_UP)) { ra.draw_rectangle(317, 202, 19, 26, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) { ra.draw_rectangle(317, 202 + 45, 19, 26, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) { ra.draw_rectangle(292, 228, 25, 19, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) { ra.draw_rectangle(292 + 44, 228, 26, 19, ra.RED); }
+
+                    # draw buttons: left-right back
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) { ra.draw_circle(259, 61, 20.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) { ra.draw_circle(536, 61, 20.0, ra.RED); }
+
+                    # draw axis: left joystick
+                    var left_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_THUMB)) { left_gamepad_color = ra.RED; }
+                    ra.draw_circle(259, 152, 39.0, ra.BLACK);
+                    ra.draw_circle(259, 152, 34.0, ra.LIGHTGRAY);
+                    ra.draw_circle(259 + ((left_stick_x * 20.0)::i32), 152 + ((left_stick_y * 20.0)::i32), 25.0, left_gamepad_color);
+
+                    # draw axis: right joystick
+                    var right_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_THUMB)) { right_gamepad_color = ra.RED; }
+                    ra.draw_circle(461, 237, 38.0, ra.BLACK);
+                    ra.draw_circle(461, 237, 33.0, ra.LIGHTGRAY);
+                    ra.draw_circle(461 + ((right_stick_x * 20.0)::i32), 237 + ((right_stick_y * 20.0)::i32), 25.0, right_gamepad_color);
+
+                    # draw axis: left-right triggers
+                    ra.draw_rectangle(170, 30, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(604, 30, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(170, 30, 15, (((1.0 + left_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                    ra.draw_rectangle(604, 30, 15, (((1.0 + right_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                } or ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), ps_alias_1) > -1) ||
+                      (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), ps_alias_2) > -1)) {
+                    ra.draw_texture(tex_ps3_pad, 0, 0, ra.DARKGRAY);
+
+                    # draw buttons: ps
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE)) { ra.draw_circle(396, 222, 13.0, ra.RED); }
+
+                    # draw buttons: basic
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_LEFT)) { ra.draw_rectangle(328, 170, 32, 13, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_RIGHT)) { ra.draw_triangle(ra.Vector2{ x: 436.0, y: 168.0 }, ra.Vector2{ x: 436.0, y: 185.0 }, ra.Vector2{ x: 464.0, y: 177.0 }, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_UP)) { ra.draw_circle(557, 144, 13.0, ra.LIME); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) { ra.draw_circle(586, 173, 13.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) { ra.draw_circle(557, 203, 13.0, ra.VIOLET); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) { ra.draw_circle(527, 173, 13.0, ra.PINK); }
+
+                    # draw buttons: d-pad
+                    ra.draw_rectangle(225, 132, 24, 84, ra.BLACK);
+                    ra.draw_rectangle(195, 161, 84, 25, ra.BLACK);
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_UP)) { ra.draw_rectangle(225, 132, 24, 29, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) { ra.draw_rectangle(225, 132 + 54, 24, 30, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) { ra.draw_rectangle(195, 161, 30, 25, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) { ra.draw_rectangle(195 + 54, 161, 30, 25, ra.RED); }
+
+                    # draw buttons: left-right back buttons
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) { ra.draw_circle(239, 82, 20.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) { ra.draw_circle(557, 82, 20.0, ra.RED); }
+
+                    # draw axis: left joystick
+                    var left_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_THUMB)) { left_gamepad_color = ra.RED; }
+                    ra.draw_circle(319, 255, 35.0, ra.BLACK);
+                    ra.draw_circle(319, 255, 31.0, ra.LIGHTGRAY);
+                    ra.draw_circle(319 + ((left_stick_x * 20.0)::i32), 255 + ((left_stick_y * 20.0)::i32), 25.0, left_gamepad_color);
+
+                    # draw axis: right joystick
+                    var right_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_THUMB)) { right_gamepad_color = ra.RED; }
+                    ra.draw_circle(475, 255, 35.0, ra.BLACK);
+                    ra.draw_circle(475, 255, 31.0, ra.LIGHTGRAY);
+                    ra.draw_circle(475 + ((right_stick_x * 20.0)::i32), 255 + ((right_stick_y * 20.0)::i32), 25.0, right_gamepad_color);
+
+                    # draw axis: left-right triggers
+                    ra.draw_rectangle(169, 48, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(611, 48, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(169, 48, 15, (((1.0 + left_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                    ra.draw_rectangle(611, 48, 15, (((1.0 + right_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                } or {
+                    # draw background: generic
+                    ra.draw_rectangle_rounded(ra.Rectangle{ x: 175.0, y: 110.0, width: 460.0, height: 220.0 }, 0.3, 16, ra.DARKGRAY);
+
+                    # draw buttons: basic
+                    ra.draw_circle(365, 170, 12.0, ra.RAYWHITE);
+                    ra.draw_circle(405, 170, 12.0, ra.RAYWHITE);
+                    ra.draw_circle(445, 170, 12.0, ra.RAYWHITE);
+                    ra.draw_circle(516, 191, 17.0, ra.RAYWHITE);
+                    ra.draw_circle(551, 227, 17.0, ra.RAYWHITE);
+                    ra.draw_circle(587, 191, 17.0, ra.RAYWHITE);
+                    ra.draw_circle(551, 155, 17.0, ra.RAYWHITE);
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_LEFT)) { ra.draw_circle(365, 170, 10.0, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE)) { ra.draw_circle(405, 170, 10.0, ra.GREEN); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_MIDDLE_RIGHT)) { ra.draw_circle(445, 170, 10.0, ra.BLUE); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) { ra.draw_circle(516, 191, 15.0, ra.GOLD); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) { ra.draw_circle(551, 227, 15.0, ra.BLUE); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) { ra.draw_circle(587, 191, 15.0, ra.GREEN); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_FACE_UP)) { ra.draw_circle(551, 155, 15.0, ra.RED); }
+
+                    # draw buttons: d-pad
+                    ra.draw_rectangle(245, 145, 28, 88, ra.RAYWHITE);
+                    ra.draw_rectangle(215, 174, 88, 29, ra.RAYWHITE);
+                    ra.draw_rectangle(247, 147, 24, 84, ra.BLACK);
+                    ra.draw_rectangle(217, 176, 84, 25, ra.BLACK);
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_UP)) { ra.draw_rectangle(247, 147, 24, 29, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) { ra.draw_rectangle(247, 147 + 54, 24, 30, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) { ra.draw_rectangle(217, 176, 30, 25, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) { ra.draw_rectangle(217 + 54, 176, 30, 25, ra.RED); }
+
+                    # draw buttons: left-right back
+                    ra.draw_rectangle_rounded(ra.Rectangle{ x: 215.0, y: 98.0, width: 100.0, height: 10.0 }, 0.5, 16, ra.DARKGRAY);
+                    ra.draw_rectangle_rounded(ra.Rectangle{ x: 495.0, y: 98.0, width: 100.0, height: 10.0 }, 0.5, 16, ra.DARKGRAY);
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_TRIGGER_1)) { ra.draw_rectangle_rounded(ra.Rectangle{ x: 215.0, y: 98.0, width: 100.0, height: 10.0 }, 0.5, 16, ra.RED); }
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_TRIGGER_1)) { ra.draw_rectangle_rounded(ra.Rectangle{ x: 495.0, y: 98.0, width: 100.0, height: 10.0 }, 0.5, 16, ra.RED); }
+
+                    # draw axis: left joystick
+                    var left_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_LEFT_THUMB)) { left_gamepad_color = ra.RED; }
+                    ra.draw_circle(345, 260, 40.0, ra.BLACK);
+                    ra.draw_circle(345, 260, 35.0, ra.LIGHTGRAY);
+                    ra.draw_circle(345 + ((left_stick_x * 20.0)::i32), 260 + ((left_stick_y * 20.0)::i32), 25.0, left_gamepad_color);
+
+                    # draw axis: right joystick
+                    var right_gamepad_color: ra.Color = ra.BLACK;
+                    if (ra.is_gamepad_button_down(gamepad, ra.GAMEPAD_BUTTON_RIGHT_THUMB)) { right_gamepad_color = ra.RED; }
+                    ra.draw_circle(465, 260, 40.0, ra.BLACK);
+                    ra.draw_circle(465, 260, 35.0, ra.LIGHTGRAY);
+                    ra.draw_circle(465 + ((right_stick_x * 20.0)::i32), 260 + ((right_stick_y * 20.0)::i32), 25.0, right_gamepad_color);
+
+                    # draw axis: left-right triggers
+                    ra.draw_rectangle(151, 110, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(644, 110, 15, 70, ra.GRAY);
+                    ra.draw_rectangle(151, 110, 15, (((1.0 + left_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                    ra.draw_rectangle(644, 110, 15, (((1.0 + right_trigger) / 2.0) * 70.0)::i32, ra.RED);
+                }
+
+                ra.draw_text(ra.text_format("DETECTED AXIS [%i]:", ra.get_gamepad_axis_count(gamepad)), 10, 50, 10, ra.MAROON);
+
+                var i: i32 = 0;
+                for (i < ra.get_gamepad_axis_count(gamepad)) {
+                    ra.draw_text(ra.text_format("AXIS %i: %.02f", i, ra.get_gamepad_axis_movement(gamepad, i)::f64), 20, 70 + 20 * i, 10, ra.DARKGRAY);
+                    i = i + 1;
+                }
+
+                # draw vibrate button
+                ra.draw_rectangle_rec(vibrate_button, ra.SKYBLUE);
+                ra.draw_text("VIBRATE", (vibrate_button.x + 14.0)::i32, (vibrate_button.y + 1.0)::i32, 10, ra.DARKGRAY);
+
+                if (ra.get_gamepad_button_pressed() != ra.GAMEPAD_BUTTON_UNKNOWN) {
+                    ra.draw_text(ra.text_format("DETECTED BUTTON: %i", ra.get_gamepad_button_pressed()), 10, 430, 10, ra.RED);
+                } or {
+                    ra.draw_text("DETECTED BUTTON: NONE", 10, 430, 10, ra.GRAY);
+                }
+            } or {
+                ra.draw_text(ra.text_format("GP%d: NOT DETECTED", gamepad), 10, 10, 10, ra.GRAY);
+                ra.draw_texture(tex_xbox_pad, 0, 0, ra.LIGHTGRAY);
+            }
+
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    # de-initialization
+    ra.unload_texture(tex_ps3_pad);
+    ra.unload_texture(tex_xbox_pad);
+    ra.close_window(); # close window and opengl context
+
+    ret 0;
+}
+

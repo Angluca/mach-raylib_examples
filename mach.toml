@@ -179,6 +179,22 @@ targets = ["*"]
 link = []
 need = []
 
+[artifact.core_smooth_pixelperfect]
+kind = "bin"
+entry = "core/core_smooth_pixelperfect.mach"
+out = "bin/core/core_smooth_pixelperfect"
+targets = ["*"]
+link = []
+need = []
+
+[artifact.core_input_gamepad]
+kind = "bin"
+entry = "core/core_input_gamepad.mach"
+out = "bin/core/core_input_gamepad"
+targets = ["*"]
+link = []
+need = []
+
 # -- textures ------------------
 # -- text ----------------------
 # -- shapes --------------------
