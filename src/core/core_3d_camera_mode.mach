@@ -25,8 +25,6 @@ fun main(argc: i64, argv: **u8) i64 {
     for (!ra.window_should_close()) { # detect window close button or esc key
         # update
 
-        # todo: update your variables here
-
         # draw
         ra.begin_drawing();
             ra.clear_background(ra.RAYWHITE);

@@ -7,8 +7,8 @@ use rl: raylib.rlgl;
 use raylib.ra.Vector2;
 use raylib.ra.Rectangle;
 
-var PLAYER_SIZE: i32 = 40;
-var MOVE_SPEED: f32 = 3.0;
+val PLAYER_SIZE: i32 = 40;
+val MOVE_SPEED: f32 = 3.0;
 #[symbol("main")]
 fun main(argc: i64, argv: **u8) i64 {
     # -- Init -----------

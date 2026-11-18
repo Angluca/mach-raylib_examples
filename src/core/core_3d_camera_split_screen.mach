@@ -2,8 +2,8 @@ use std.runtime;
 use raylib.ra;
 
 # grid data
-val count: f32 = 5.0;
-val spacing: f32 = 4.0;
+val COUNT: f32 = 5.0;
+val SPACING: f32 = 4.0;
 
 # draw the shared world scene from one view camera
 # ---
@@ -15,15 +15,15 @@ fun draw_scene(camera1: ra.Camera, camera2: ra.Camera, view: ra.Camera) {
         # draw scene: grid of cube trees on a plane to make a "world"
         ra.draw_plane(ra.Vector3{ x: 0.0, y: 0.0, z: 0.0 }, ra.Vector2{ x: 50.0, y: 50.0 }, ra.BEIGE);
 
-        var x: f32 = -count * spacing;
-        for (x <= count * spacing) {
-            var z: f32 = -count * spacing;
-            for (z <= count * spacing) {
+        var x: f32 = -COUNT * SPACING;
+        for (x <= COUNT * SPACING) {
+            var z: f32 = -COUNT * SPACING;
+            for (z <= COUNT * SPACING) {
                 ra.draw_cube(ra.Vector3{ x: x, y: 1.5, z: z }, 1.0, 1.0, 1.0, ra.LIME);
                 ra.draw_cube(ra.Vector3{ x: x, y: 0.5, z: z }, 0.25, 1.0, 0.25, ra.BROWN);
-                z = z + spacing;
+                z = z + SPACING;
             }
-            x = x + spacing;
+            x = x + SPACING;
         }
 
         # draw a cube at each player's position

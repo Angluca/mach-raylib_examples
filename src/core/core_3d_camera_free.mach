@@ -35,14 +35,10 @@ fun main(argc: i64, argv: **u8) i64 {
         ra.begin_drawing();
 
             ra.clear_background(ra.RAYWHITE);
-
             ra.begin_mode3d(camera);
-
                 ra.draw_cube(cube_position, 2.0, 2.0, 2.0, ra.RED);
                 ra.draw_cube_wires(cube_position, 2.0, 2.0, 2.0, ra.MAROON);
-
                 ra.draw_grid(10, 1.0);
-
             ra.end_mode3d();
 
             ra.draw_rectangle(10, 10, 320, 93, ra.fade(ra.SKYBLUE, 0.5));
@@ -52,7 +48,6 @@ fun main(argc: i64, argv: **u8) i64 {
             ra.draw_text("- Mouse Wheel to Zoom in-out", 40, 40, 10, ra.DARKGRAY);
             ra.draw_text("- Mouse Wheel Pressed to Pan", 40, 60, 10, ra.DARKGRAY);
             ra.draw_text("- Z to zoom to (0, 0, 0)", 40, 80, 10, ra.DARKGRAY);
-
             ra.logo(screen_width - 160, screen_height - 80, 1.0);
         ra.end_drawing();
     }

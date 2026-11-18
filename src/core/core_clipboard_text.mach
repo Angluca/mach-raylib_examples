@@ -1,0 +1,144 @@
+use std.runtime;
+use std.types.bool.bool;
+#use std.types.bool.true;
+use std.types.bool.false;
+#use std.types.result.res;
+use std.types.size.usize;
+use std.types.string.str;
+use raylib.ra;
+use ru: raylib.raygui;
+
+# max number of sample texts
+val MAX_TEXT_SAMPLES: i32 = 5;
+
+# entrypoint of the clipboard text example
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # initialization
+    val screen_width: i32 = 800;
+    val screen_height: i32 = 450;
+
+    ra.init_window(screen_width, screen_height, "raylib [core] example - clipboard text");
+
+    # define some sample texts
+    val sample_texts: [5]str = [5]str{
+        "Hello from raylib!",
+        "The quick brown fox jumps over the lazy dog",
+        "Clipboard operations are useful!",
+        "raylib is a simple and easy-to-use library",
+        "Copy and paste me!"
+    };
+
+    var clipboard_text: str = nil;
+    var input_buffer: [256]u8; # zero-initialized, so the buffer starts as empty string
+    ra.text_copy(?input_buffer[0], "Hello from raylib!"); # random initial string
+
+    # ui required variables
+    var text_box_edit_mode: bool = false;
+
+    var btn_cut_pressed: bool = false;
+    var btn_copy_pressed: bool = false;
+    var btn_paste_pressed: bool = false;
+    var btn_clear_pressed: bool = false;
+    var btn_random_pressed: bool = false;
+
+    # set ui style
+    ru.set_style(ru.DEFAULT, ru.TEXT_SIZE, 20);
+    ru.set_icon_scale(2);
+
+    ra.set_target_fps(60); # set our game to run at 60 frames-per-second
+
+    # main game loop
+    for (!ra.window_should_close()) { # detect window close button or esc key
+        # update
+
+        # handle button interactions
+        if (btn_cut_pressed) {
+            ra.set_clipboard_text(?input_buffer[0]);
+            clipboard_text = ra.get_clipboard_text();
+            input_buffer[0] = 0; # quick solution to clear text
+        }
+
+        if (btn_copy_pressed) {
+            ra.set_clipboard_text(?input_buffer[0]); # copy text to clipboard
+            clipboard_text = ra.get_clipboard_text(); # get text from clipboard
+        }
+
+        if (btn_paste_pressed) {
+            # paste text from clipboard
+            clipboard_text = ra.get_clipboard_text();
+            if (clipboard_text != nil) {
+                ra.text_copy(?input_buffer[0], clipboard_text);
+            }
+        }
+
+        if (btn_clear_pressed) {
+            input_buffer[0] = 0; # quick solution to clear text
+        }
+
+        if (btn_random_pressed) {
+            # get random text from sample list
+            val random_index: i32 = ra.get_random_value(0, MAX_TEXT_SAMPLES - 1);
+            ra.text_copy(?input_buffer[0], sample_texts[random_index::usize]);
+        }
+
+        # quick cut/copy/paste with keyboard shortcuts
+        if (ra.is_key_down(ra.KEY_LEFT_CONTROL) || ra.is_key_down(ra.KEY_RIGHT_CONTROL)) {
+            if (ra.is_key_pressed(ra.KEY_X)) {
+                ra.set_clipboard_text(?input_buffer[0]);
+                input_buffer[0] = 0; # quick solution to clear text
+            }
+
+            if (ra.is_key_pressed(ra.KEY_C)) {
+                ra.set_clipboard_text(?input_buffer[0]);
+            }
+
+            if (ra.is_key_pressed(ra.KEY_V)) {
+                clipboard_text = ra.get_clipboard_text();
+                if (clipboard_text != nil) {
+                    ra.text_copy(?input_buffer[0], clipboard_text);
+                }
+            }
+        }
+
+        # draw
+        ra.begin_drawing();
+            ra.clear_background(ra.RAYWHITE);
+
+            # draw instructions
+            ru.label(ra.Rectangle{ x: 50.0, y: 20.0, width: 700.0, height: 36.0 }, "Use the BUTTONS or KEY SHORTCUTS:");
+            ra.draw_text("[CTRL+X] - CUT | [CTRL+C] COPY | [CTRL+V] | PASTE", 50, 60, 20, ra.MAROON);
+
+            # draw text box
+            if (ru.text_box(ra.Rectangle{ x: 50.0, y: 120.0, width: 652.0, height: 40.0 }, ?input_buffer[0], 256, text_box_edit_mode) != 0) {
+                text_box_edit_mode = !text_box_edit_mode;
+            }
+
+            # random text button
+            btn_random_pressed = ru.button(ra.Rectangle{ x: (50 + 652 + 8)::f32, y: 120.0, width: 40.0, height: 40.0 }, "#77#") != 0;
+
+            # draw buttons
+            btn_cut_pressed = ru.button(ra.Rectangle{ x: 50.0, y: 180.0, width: 158.0, height: 40.0 }, "#17#CUT") != 0;
+            btn_copy_pressed = ru.button(ra.Rectangle{ x: (50 + 165)::f32, y: 180.0, width: 158.0, height: 40.0 }, "#16#COPY") != 0;
+            btn_paste_pressed = ru.button(ra.Rectangle{ x: (50 + 165 * 2)::f32, y: 180.0, width: 158.0, height: 40.0 }, "#18#PASTE") != 0;
+            btn_clear_pressed = ru.button(ra.Rectangle{ x: (50 + 165 * 3)::f32, y: 180.0, width: 158.0, height: 40.0 }, "#143#CLEAR") != 0;
+
+            # draw clipboard status
+            ru.set_state(ru.STATE_DISABLED);
+            ru.label(ra.Rectangle{ x: 50.0, y: 260.0, width: 700.0, height: 40.0 }, "Clipboard current text data:");
+            ru.set_style(ru.TEXTBOX, ru.TEXT_READONLY, 1);
+            ru.text_box(ra.Rectangle{ x: 50.0, y: 300.0, width: 700.0, height: 40.0 }, clipboard_text, 256, false);
+            ru.set_style(ru.TEXTBOX, ru.TEXT_READONLY, 0);
+            ru.label(ra.Rectangle{ x: 50.0, y: 360.0, width: 700.0, height: 40.0 }, "Try copying text from other applications and pasting here!");
+            ru.set_state(ru.STATE_NORMAL);
+
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    # de-initialization
+    ra.close_window(); # close window and opengl context
+
+    ret 0;
+}
+

@@ -35,6 +35,15 @@ simd = "scalarize"
 vectorize = true
 float_reassoc = false
 
+[link.raygui]
+source = "system"
+#name = "libs/libraygui.a"
+name = "raygui"
+os = ["linux", "windows", "darwin"]
+isa = "*"
+abi = "*"
+export = true
+
 [dep.raylib]
 #path = "dep/raylib"
 git = "https://github.com/angluca/mach-raylib"
@@ -193,6 +202,14 @@ entry = "core/core_input_gamepad.mach"
 out = "bin/core/core_input_gamepad"
 targets = ["*"]
 link = []
+need = []
+
+[artifact.core_clipboard_text]
+kind = "bin"
+entry = "core/core_clipboard_text.mach"
+out = "bin/core/core_clipboard_text"
+targets = ["*"]
+link = ["raygui"]
 need = []
 
 # -- textures ------------------

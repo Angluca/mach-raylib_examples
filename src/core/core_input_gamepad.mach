@@ -3,10 +3,10 @@ use std.types.string.str;
 use raylib.ra;
 
 # gamepad name id depends on drivers and os
-val xbox_alias_1: str = "xbox";
-val xbox_alias_2: str = "x-box";
-val ps_alias_1: str = "playstation";
-val ps_alias_2: str = "sony";
+val XBOX_ALIAS_1: str = "xbox";
+val XBOX_ALIAS_2: str = "x-box";
+val PS_ALIAS_1: str = "playstation";
+val PS_ALIAS_2: str = "sony";
 
 # entrypoint of the input gamepad example
 #[symbol("main")]
@@ -82,8 +82,8 @@ fun main(argc: i64, argv: **u8) i64 {
                 if (left_trigger < left_trigger_deadzone) { left_trigger = -1.0; }
                 if (right_trigger < right_trigger_deadzone) { right_trigger = -1.0; }
 
-                if ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), xbox_alias_1) > -1) ||
-                    (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), xbox_alias_2) > -1)) {
+                if ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), XBOX_ALIAS_1) > -1) ||
+                    (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), XBOX_ALIAS_2) > -1)) {
                     ra.draw_texture(tex_xbox_pad, 0, 0, ra.DARKGRAY);
 
                     # draw buttons: xbox home
@@ -128,8 +128,8 @@ fun main(argc: i64, argv: **u8) i64 {
                     ra.draw_rectangle(604, 30, 15, 70, ra.GRAY);
                     ra.draw_rectangle(170, 30, 15, (((1.0 + left_trigger) / 2.0) * 70.0)::i32, ra.RED);
                     ra.draw_rectangle(604, 30, 15, (((1.0 + right_trigger) / 2.0) * 70.0)::i32, ra.RED);
-                } or ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), ps_alias_1) > -1) ||
-                      (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), ps_alias_2) > -1)) {
+                } or ((ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), PS_ALIAS_1) > -1) ||
+                      (ra.text_find_index(ra.text_to_lower(ra.get_gamepad_name(gamepad)), PS_ALIAS_2) > -1)) {
                     ra.draw_texture(tex_ps3_pad, 0, 0, ra.DARKGRAY);
 
                     # draw buttons: ps
