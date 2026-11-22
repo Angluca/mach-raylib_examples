@@ -220,10 +220,18 @@ targets = ["*"]
 link = ["raygui"]
 need = []
 
+# -- shaders -------------------
+[artifact.shapes_basic_shapes]
+kind = "bin"
+entry = "shapes/shapes_basic_shapes.mach"
+out = "bin/shapes/shapes_basic_shapes"
+targets = ["*"]
+link = []
+need = []
+
 # -- textures ------------------
 # -- text ----------------------
 # -- shapes --------------------
-# -- shaders -------------------
 # -- models --------------------
 # -- other ---------------------
 # -- audio ---------------------
