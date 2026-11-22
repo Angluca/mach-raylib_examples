@@ -1,0 +1,128 @@
+use std.runtime;
+use std.types.string.str;
+use std.types.string.str_len;
+use std.types.bool.bool;
+use std.types.bool.false;
+use std.memory;
+use raylib.ra;
+use gui: raylib.raygui;
+
+# static buffer used by GetDataAsHexText() (static local in C, hoisted here)
+var hex_text_buffer: [128]u8; # zero-initialized
+
+# get data as hex text
+fun get_data_as_hex_text(data: *u32, data_size: i32) str {
+    memory.zero[u8](?hex_text_buffer[0], 128);
+
+    if ((data != nil) && (data_size > 0) && (data_size < ((128 / 8) - 1))) {
+        var i: i32 = 0;
+        for (i < data_size) {
+            ra.text_copy(?hex_text_buffer[(i * 8)::u32], ra.text_format("%08X", data[i::u32]));
+            i = i + 1;
+        }
+    } or {
+        ra.text_copy(?hex_text_buffer[0], "00000000");
+    }
+
+    ret ?hex_text_buffer[0];
+}
+
+# entrypoint of the compute hash example
+#[symbol("main")]
+fun main(argc: i64, argv: **u8) i64 {
+    # initialization
+    val screen_width: i32 = 800;
+    val screen_height: i32 = 450;
+
+    ra.init_window(screen_width, screen_height, "raylib [core] example - compute hash");
+
+    # ui controls variables
+    var text_input: [96]u8; # zero-initialized
+    ra.text_copy(?text_input[0], "The quick brown fox jumps over the lazy dog.");
+    var text_box_edit_mode: bool = false;
+    var btn_compute_hashes: bool = false;
+
+    # data hash values
+    var hash_crc32: u32 = 0;
+    var hash_md5: *u32 = nil;
+    var hash_sha1: *u32 = nil;
+    var hash_sha256: *u32 = nil;
+
+    # base64 encoded data
+    var base64_text: str = nil;
+    var base64_text_size: i32 = 0;
+
+    ra.set_target_fps(60); # set our game to run at 60 frames-per-second
+
+    # main game loop
+    for (!ra.window_should_close()) { # detect window close button or esc key
+        # update
+        if (btn_compute_hashes) {
+            val text_input_len: i32 = str_len(?text_input[0])::i32;
+
+            # encode data to base64 string (includes null terminator), memory must be ra.mem_free()
+            if (base64_text != nil) {
+                ra.mem_free(base64_text);
+                base64_text = nil;
+                base64_text_size = 0;
+            }
+            base64_text = ra.encode_data_base64(?text_input[0], text_input_len, ?base64_text_size);
+
+            hash_crc32 = ra.compute_crc32(?text_input[0], text_input_len);     # compute crc32 hash code (4 bytes)
+            hash_md5 = ra.compute_md5(?text_input[0], text_input_len);         # compute md5 hash code, returns static int[4] (16 bytes)
+            hash_sha1 = ra.compute_sha1(?text_input[0], text_input_len);       # compute sha1 hash code, returns static int[5] (20 bytes)
+            hash_sha256 = ra.compute_sha256(?text_input[0], text_input_len);   # compute sha256 hash code, returns static int[8] (32 bytes)
+        }
+
+        # draw
+        ra.begin_drawing();
+            ra.clear_background(ra.RAYWHITE);
+
+            gui.set_style(gui.DEFAULT, gui.TEXT_SIZE, 20);
+            gui.set_style(gui.DEFAULT, gui.TEXT_SPACING, 2);
+            gui.label(ra.Rectangle{ x: 40.0, y: 26.0, width: 720.0, height: 32.0 }, "INPUT DATA (TEXT):");
+
+            gui.set_style(gui.DEFAULT, gui.TEXT_SPACING, 1);
+            gui.set_style(gui.DEFAULT, gui.TEXT_SIZE, 10);
+
+            if (gui.text_box(ra.Rectangle{ x: 40.0, y: 64.0, width: 720.0, height: 32.0 }, ?text_input[0], 95, text_box_edit_mode) != 0) {
+                text_box_edit_mode = !text_box_edit_mode;
+            }
+
+            btn_compute_hashes = gui.button(ra.Rectangle{ x: 40.0, y: (64 + 40)::f32, width: 720.0, height: 32.0 }, "COMPUTE INPUT DATA HASHES") != 0;
+
+            gui.set_style(gui.DEFAULT, gui.TEXT_SIZE, 20);
+            gui.set_style(gui.DEFAULT, gui.TEXT_SPACING, 2);
+            gui.label(ra.Rectangle{ x: 40.0, y: 160.0, width: 720.0, height: 32.0 }, "INPUT DATA HASH VALUES:");
+            gui.set_style(gui.DEFAULT, gui.TEXT_SPACING, 1);
+            gui.set_style(gui.DEFAULT, gui.TEXT_SIZE, 10);
+
+            gui.set_style(gui.TEXTBOX, gui.TEXT_READONLY, 1);
+            gui.label(ra.Rectangle{ x: 40.0, y: 200.0, width: 120.0, height: 32.0 }, "CRC32 [32 bit]:");
+            gui.text_box(ra.Rectangle{ x: (40 + 120)::f32, y: 200.0, width: (720 - 120)::f32, height: 32.0 }, get_data_as_hex_text(?hash_crc32, 1), 120, false);
+            gui.label(ra.Rectangle{ x: 40.0, y: (200 + 36)::f32, width: 120.0, height: 32.0 }, "MD5 [128 bit]:");
+            gui.text_box(ra.Rectangle{ x: (40 + 120)::f32, y: (200 + 36)::f32, width: (720 - 120)::f32, height: 32.0 }, get_data_as_hex_text(hash_md5, 4), 120, false);
+            gui.label(ra.Rectangle{ x: 40.0, y: (200 + 36 * 2)::f32, width: 120.0, height: 32.0 }, "SHA1 [160 bit]:");
+            gui.text_box(ra.Rectangle{ x: (40 + 120)::f32, y: (200 + 36 * 2)::f32, width: (720 - 120)::f32, height: 32.0 }, get_data_as_hex_text(hash_sha1, 5), 120, false);
+            gui.label(ra.Rectangle{ x: 40.0, y: (200 + 36 * 3)::f32, width: 120.0, height: 32.0 }, "SHA256 [256 bit]:");
+            gui.text_box(ra.Rectangle{ x: (40 + 120)::f32, y: (200 + 36 * 3)::f32, width: (720 - 120)::f32, height: 32.0 }, get_data_as_hex_text(hash_sha256, 8), 120, false);
+
+            gui.set_state(gui.STATE_FOCUSED);
+
+            gui.label(ra.Rectangle{ x: 40.0, y: (200 + 36 * 5 - 30)::f32, width: 320.0, height: 32.0 }, "BONUS - BAS64 ENCODED STRING:");
+            gui.set_state(gui.STATE_NORMAL);
+            gui.label(ra.Rectangle{ x: 40.0, y: (200 + 36 * 5)::f32, width: 120.0, height: 32.0 }, "BASE64 ENCODING:");
+            gui.text_box(ra.Rectangle{ x: (40 + 120)::f32, y: (200 + 36 * 5)::f32, width: (720 - 120)::f32, height: 32.0 }, base64_text, 120, false);
+            gui.set_style(gui.TEXTBOX, gui.TEXT_READONLY, 0);
+
+            ra.logo(screen_width - 160, screen_height - 80, 1.0);
+        ra.end_drawing();
+    }
+
+    # de-initialization
+    ra.mem_free(base64_text); # free base64 text data
+    ra.close_window(); # close window and opengl context
+
+    ret 0;
+}
+

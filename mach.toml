@@ -212,6 +212,14 @@ targets = ["*"]
 link = ["raygui"]
 need = []
 
+[artifact.core_compute_hash]
+kind = "bin"
+entry = "core/core_compute_hash.mach"
+out = "bin/core/core_compute_hash"
+targets = ["*"]
+link = ["raygui"]
+need = []
+
 # -- textures ------------------
 # -- text ----------------------
 # -- shapes --------------------
